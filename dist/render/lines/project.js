@@ -58,7 +58,9 @@ export function renderProjectLine(ctx) {
         gitPart = `${gitColor('git:(', colors)}${gitInner.join(' ')}${gitColor(')', colors)}`;
     }
     if (projectPart && gitPart) {
-        parts.push(`${projectPart} ${gitPart}`);
+        // Use the same visual separator as other blocks so line wrapping can split
+        // between project and git segments instead of truncating the git branch.
+        parts.push(`${projectPart} │ ${gitPart}`);
     }
     else if (projectPart) {
         parts.push(projectPart);
