@@ -1,5 +1,5 @@
 import type { RenderContext } from '../types.js';
-import { yellow, green, cyan, red, label } from './colors.js';
+import { yellow, green, red, cyan, label } from './colors.js';
 
 export function renderToolsLine(ctx: RenderContext): string | null {
   const { tools } = ctx.transcript;
@@ -17,34 +17,27 @@ export function renderToolsLine(ctx: RenderContext): string | null {
 
   for (const tool of runningTools.slice(-2)) {
     const target = tool.target ? truncatePath(tool.target) : '';
-    parts.push(`${yellow('[run]')} ${cyan(tool.name)}${target ? label(`: ${target}`, colors) : ''}`);
+    parts.push(`${yellow('●')} ${cyan(tool.name)}${target ? label(`: ${target}`, colors) : ''}`);
   }
 
-  const toolCounts = new Map<string, number>();
+  const completedCounts = new Map<string, number>();
   for (const tool of completedTools) {
-    const count = toolCounts.get(tool.name) ?? 0;
-    toolCounts.set(tool.name, count + 1);
+    completedCounts.set(tool.name, (completedCounts.get(tool.name) ?? 0) + 1);
   }
 
-  const sortedTools = Array.from(toolCounts.entries())
+  const sortedCompleted = Array.from(completedCounts.entries())
     .sort((a, b) => b[1] - a[1])
     .slice(0, 4);
 
-  for (const [name, count] of sortedTools) {
-    parts.push(`${green('[ok]')} ${name} ${label(`x${count}`, colors)}`);
+  for (const [name, count] of sortedCompleted) {
+    parts.push(`${green('✓')} ${name} ${label(`x${count}`, colors)}`);
   }
 
   if (erroredTools.length > 0) {
-    parts.push(`${red('[err]')} ${label(`x${erroredTools.length}`, colors)}`);
+    parts.push(`${red('✗')} ${label(`errors x${erroredTools.length}`, colors)}`);
   }
 
-  parts.push(label(`ops:${tools.length}`, colors));
-
-  if (parts.length === 0) {
-    return null;
-  }
-
-  return parts.join(' | ');
+  return parts.length > 0 ? parts.join(' | ') : null;
 }
 
 function truncatePath(path: string, maxLen: number = 20): string {
