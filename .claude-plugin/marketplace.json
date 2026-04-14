@@ -1,0 +1,23 @@
+{
+  "name": "claude-hud-local",
+  "owner": {
+    "name": "Local",
+    "email": "local@example.com"
+  },
+  "metadata": {
+    "description": "Local marketplace for claude-hud",
+    "version": "0.0.1"
+  },
+  "plugins": [
+    {
+      "name": "claude-hud",
+      "description": "Real-time statusline HUD for Claude Code",
+      "version": "0.0.12",
+      "source": {
+        "source": "url",
+        "url": "file:///C:/Users/10612/claude-hud"
+      },
+      "strict": true
+    }
+  ]
+}
