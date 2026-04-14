@@ -1,5 +1,5 @@
 import type { RenderContext } from '../types.js';
-import { yellow, green, cyan, label } from './colors.js';
+import { yellow, green, cyan, red, label } from './colors.js';
 
 export function renderToolsLine(ctx: RenderContext): string | null {
   const { tools } = ctx.transcript;
@@ -12,11 +12,12 @@ export function renderToolsLine(ctx: RenderContext): string | null {
   const parts: string[] = [];
 
   const runningTools = tools.filter((t) => t.status === 'running');
-  const completedTools = tools.filter((t) => t.status === 'completed' || t.status === 'error');
+  const completedTools = tools.filter((t) => t.status === 'completed');
+  const erroredTools = tools.filter((t) => t.status === 'error');
 
   for (const tool of runningTools.slice(-2)) {
     const target = tool.target ? truncatePath(tool.target) : '';
-    parts.push(`${yellow('◐')} ${cyan(tool.name)}${target ? label(`: ${target}`, colors) : ''}`);
+    parts.push(`${yellow('[run]')} ${cyan(tool.name)}${target ? label(`: ${target}`, colors) : ''}`);
   }
 
   const toolCounts = new Map<string, number>();
@@ -30,8 +31,14 @@ export function renderToolsLine(ctx: RenderContext): string | null {
     .slice(0, 4);
 
   for (const [name, count] of sortedTools) {
-    parts.push(`${green('✓')} ${name} ${label(`×${count}`, colors)}`);
+    parts.push(`${green('[ok]')} ${name} ${label(`x${count}`, colors)}`);
   }
+
+  if (erroredTools.length > 0) {
+    parts.push(`${red('[err]')} ${label(`x${erroredTools.length}`, colors)}`);
+  }
+
+  parts.push(label(`ops:${tools.length}`, colors));
 
   if (parts.length === 0) {
     return null;
@@ -41,12 +48,10 @@ export function renderToolsLine(ctx: RenderContext): string | null {
 }
 
 function truncatePath(path: string, maxLen: number = 20): string {
-  // Normalize Windows backslashes to forward slashes for consistent display
   const normalizedPath = path.replace(/\\/g, '/');
 
   if (normalizedPath.length <= maxLen) return normalizedPath;
 
-  // Split by forward slash (already normalized)
   const parts = normalizedPath.split('/');
   const filename = parts.pop() || normalizedPath;
 
