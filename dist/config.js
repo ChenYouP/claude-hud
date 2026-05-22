@@ -119,7 +119,7 @@ function validateUsageValue(value) {
     return value === 'percent' || value === 'remaining';
 }
 function validateLanguage(value) {
-    return value === 'en' || value === 'zh';
+    return value === 'en' || value === 'zh' || value === 'zh-Hans';
 }
 function validateModelFormat(value) {
     return value === 'full' || value === 'compact' || value === 'short';
