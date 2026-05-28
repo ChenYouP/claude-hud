@@ -8,6 +8,7 @@ export type MessageKey =
   | "label.hooks"
   | "label.estimatedCost"
   | "label.cost"
+  | "label.daily"
   // Status
   | "status.limitReached"
   | "status.allTodosComplete"

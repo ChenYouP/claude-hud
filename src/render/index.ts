@@ -13,6 +13,7 @@ import {
   renderUsageLine,
   renderMemoryLine,
   renderSessionTokensLine,
+  renderDailyTokensLine,
 } from './lines/index.js';
 import { dim, RESET } from './colors.js';
 import { UNKNOWN_TERMINAL_WIDTH } from '../utils/terminal.js';
@@ -452,6 +453,14 @@ export function render(ctx: RenderContext): void {
       const sessionTokensLine = renderSessionTokensLine(ctx);
       if (sessionTokensLine) {
         lines.push(sessionTokensLine);
+      }
+    }
+
+    // Daily token totals (all sessions today)
+    if (ctx.config?.display?.showDailyTokens) {
+      const dailyTokensLine = renderDailyTokensLine(ctx);
+      if (dailyTokensLine) {
+        lines.push(dailyTokensLine);
       }
     }
 

@@ -10,6 +10,7 @@ export const en: Messages = {
   "label.hooks": "hooks",
   "label.estimatedCost": "Est.",
   "label.cost": "Cost",
+  "label.daily": "Today",
 
   // Status
   "status.limitReached": "Limit reached",

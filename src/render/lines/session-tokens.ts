@@ -1,5 +1,6 @@
 import type { RenderContext } from '../../types.js';
 import { label } from '../colors.js';
+import { t } from '../../i18n/index.js';
 
 function formatTokens(n: number): string {
   if (n >= 1000000) {
@@ -38,4 +39,22 @@ export function renderSessionTokensLine(ctx: RenderContext): string | null {
   }
 
   return label(`Tokens ${formatTokens(total)} (${parts.join(', ')})`, colors);
+}
+
+export function renderDailyTokensLine(ctx: RenderContext): string | null {
+  const display = ctx.config?.display;
+  if (!display?.showDailyTokens || !ctx.dailyTotal) {
+    return null;
+  }
+
+  const dt = ctx.dailyTotal;
+  const dailySum = dt.inputTokens + dt.outputTokens + dt.cacheCreationTokens + dt.cacheReadTokens;
+  if (dailySum === 0) {
+    return null;
+  }
+
+  const colors = ctx.config?.colors;
+  const sessionLabel = dt.sessionCount > 1 ? ` (${dt.sessionCount} sessions)` : '';
+
+  return label(`${t('label.daily')} ${formatTokens(dailySum)}${sessionLabel}`, colors);
 }

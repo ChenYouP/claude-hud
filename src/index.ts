@@ -8,6 +8,7 @@ import { parseExtraCmdArg, runExtraCmd } from "./extra-cmd.js";
 import { getClaudeCodeVersion } from "./version.js";
 import { getMemoryUsage } from "./memory.js";
 import { setLanguage, t } from "./i18n/index.js";
+import { updateDailyTokens } from "./daily-tracker.js";
 import type { RenderContext } from "./types.js";
 import { fileURLToPath } from "node:url";
 import { realpathSync } from "node:fs";
@@ -109,6 +110,9 @@ export async function main(overrides: Partial<MainDeps> = {}): Promise<void> {
       extraLabel,
       outputStyle,
       claudeCodeVersion,
+      dailyTotal: config.display.showDailyTokens
+        ? updateDailyTokens(transcriptPath, transcript.sessionTokens)
+        : null,
     };
 
     deps.render(ctx);

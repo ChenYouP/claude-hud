@@ -10,6 +10,7 @@ export const zh: Messages = {
   "label.hooks": "钩子",
   "label.estimatedCost": "估算",
   "label.cost": "费用",
+  "label.daily": "今日",
 
   // Status
   "status.limitReached": "已达上限",
