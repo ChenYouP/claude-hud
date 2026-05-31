@@ -40,3 +40,32 @@ export function renderSessionTokensLine(ctx: RenderContext): string | null {
 
   return label(`${t('label.tokens')} ${formatTokens(total)} (${parts.join(', ')})`, colors);
 }
+
+export function renderDailyTokensLine(ctx: RenderContext): string | null {
+  const display = ctx.config?.display;
+  if (display?.showDailyTokens === false) {
+    return null;
+  }
+
+  const daily = ctx.dailyTotal;
+  if (!daily) {
+    return null;
+  }
+
+  const total = daily.inputTokens + daily.outputTokens + daily.cacheCreationTokens + daily.cacheReadTokens;
+  if (total === 0) {
+    return null;
+  }
+
+  const colors = ctx.config?.colors;
+  const parts: string[] = [
+    `${t('format.in')}: ${formatTokens(daily.inputTokens)}`,
+    `${t('format.out')}: ${formatTokens(daily.outputTokens)}`,
+  ];
+
+  if (daily.cacheCreationTokens > 0 || daily.cacheReadTokens > 0) {
+    parts.push(`${t('format.cache')}: ${formatTokens(daily.cacheCreationTokens + daily.cacheReadTokens)}`);
+  }
+
+  return label(`${t('label.daily')} ${formatTokens(total)} (${parts.join(', ')})`, colors);
+}

@@ -1,5 +1,6 @@
 import type { HudConfig } from './config.js';
 import type { GitStatus } from './git.js';
+import type { DailyTotal } from './daily-tracker.js';
 
 export interface StdinData {
   transcript_path?: string;
@@ -146,4 +147,5 @@ export interface RenderContext {
   claudeCodeVersion?: string;
   effortLevel?: string;
   effortSymbol?: string;
+  dailyTotal?: DailyTotal | null;
 }

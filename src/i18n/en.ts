@@ -14,6 +14,7 @@ export const en: Messages = {
   "label.tokens": "Tokens",
   "label.sessionStarted": "Started",
   "label.lastReply": "Last reply",
+  "label.daily": "Daily",
 
   // Status
   "status.limitReached": "Limit reached",

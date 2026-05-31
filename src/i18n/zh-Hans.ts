@@ -14,6 +14,7 @@ export const zhHans: Messages = {
   "label.tokens": "令牌",
   "label.sessionStarted": "开始",
   "label.lastReply": "上次回复",
+  "label.daily": "今日",
 
   // Status
   "status.limitReached": "已达上限",

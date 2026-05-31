@@ -15,6 +15,7 @@ import {
   renderUsageLine,
   renderMemoryLine,
   renderSessionTokensLine,
+  renderDailyTokensLine,
   renderSessionTimeLine,
 } from './lines/index.js';
 import { dim, RESET } from './colors.js';
@@ -523,6 +524,14 @@ export function render(ctx: RenderContext): void {
       const sessionTokensLine = renderSessionTokensLine(ctx);
       if (sessionTokensLine) {
         lines.push(sessionTokensLine);
+      }
+    }
+
+    // Daily token usage
+    if (ctx.config?.display?.showDailyTokens) {
+      const dailyTokensLine = renderDailyTokensLine(ctx);
+      if (dailyTokensLine) {
+        lines.push(dailyTokensLine);
       }
     }
 
