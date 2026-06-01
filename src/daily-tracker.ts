@@ -6,10 +6,10 @@ import { getHudPluginDir } from './claude-config-dir.js';
 import type { SessionTokenUsage } from './types.js';
 
 interface SessionRecord {
-  in: number;
-  out: number;
-  cacheCreate: number;
-  cacheRead: number;
+  /** Cumulative session tokens (lifetime, used for delta calculation) */
+  cumulative: { in: number; out: number; cacheCreate: number; cacheRead: number };
+  /** Today-only delta */
+  daily: { in: number; out: number; cacheCreate: number; cacheRead: number };
 }
 
 export interface DailyTotal {
@@ -83,6 +83,15 @@ function cleanupOldDays(tokensDir: string, keepDays: number = 7): void {
   }
 }
 
+function subCumulative(a: SessionTokenUsage, b: { in: number; out: number; cacheCreate: number; cacheRead: number }): SessionTokenUsage {
+  return {
+    inputTokens: Math.max(0, a.inputTokens - b.in),
+    outputTokens: Math.max(0, a.outputTokens - b.out),
+    cacheCreationTokens: Math.max(0, a.cacheCreationTokens - b.cacheCreate),
+    cacheReadTokens: Math.max(0, a.cacheReadTokens - b.cacheRead),
+  };
+}
+
 export function updateDailyTokens(
   transcriptPath: string,
   sessionTokens: SessionTokenUsage | undefined,
@@ -99,11 +108,25 @@ export function updateDailyTokens(
   cleanupOldDays(tokensDir);
 
   const sessionFile = path.join(dayDir, `${sessionHash(transcriptPath)}.json`);
+
+  // Read previous cumulative value to compute today's delta
+  const prev = readJson(sessionFile);
+  const prevCumulative = prev?.cumulative ?? { in: 0, out: 0, cacheCreate: 0, cacheRead: 0 };
+  const dailyDelta = subCumulative(sessionTokens, prevCumulative);
+
   const record: SessionRecord = {
-    in: sessionTokens.inputTokens,
-    out: sessionTokens.outputTokens,
-    cacheCreate: sessionTokens.cacheCreationTokens,
-    cacheRead: sessionTokens.cacheReadTokens,
+    cumulative: {
+      in: sessionTokens.inputTokens,
+      out: sessionTokens.outputTokens,
+      cacheCreate: sessionTokens.cacheCreationTokens,
+      cacheRead: sessionTokens.cacheReadTokens,
+    },
+    daily: {
+      in: dailyDelta.inputTokens,
+      out: dailyDelta.outputTokens,
+      cacheCreate: dailyDelta.cacheCreationTokens,
+      cacheRead: dailyDelta.cacheReadTokens,
+    },
   };
   writeAtomic(sessionFile, JSON.stringify(record));
 
@@ -119,12 +142,11 @@ export function updateDailyTokens(
   try {
     files = fs.readdirSync(dayDir);
   } catch {
-    // readdirSync failed but we just wrote our session — return its data as fallback
     return {
-      inputTokens: record.in,
-      outputTokens: record.out,
-      cacheCreationTokens: record.cacheCreate,
-      cacheReadTokens: record.cacheRead,
+      inputTokens: record.daily.in,
+      outputTokens: record.daily.out,
+      cacheCreationTokens: record.daily.cacheCreate,
+      cacheReadTokens: record.daily.cacheRead,
       sessionCount: 1,
     };
   }
@@ -133,10 +155,12 @@ export function updateDailyTokens(
     if (!file.endsWith('.json')) continue;
     const r = readJson(path.join(dayDir, file));
     if (!r) continue;
-    total.inputTokens += r.in;
-    total.outputTokens += r.out;
-    total.cacheCreationTokens += r.cacheCreate;
-    total.cacheReadTokens += r.cacheRead;
+    // Migrate old format (flat {in, out, ...}) → new format ({cumulative, daily})
+    const daily = r.daily ?? { in: r.cumulative?.in ?? 0, out: r.cumulative?.out ?? 0, cacheCreate: r.cumulative?.cacheCreate ?? 0, cacheRead: r.cumulative?.cacheRead ?? 0 };
+    total.inputTokens += daily.in;
+    total.outputTokens += daily.out;
+    total.cacheCreationTokens += daily.cacheCreate;
+    total.cacheReadTokens += daily.cacheRead;
     total.sessionCount += 1;
   }
 
